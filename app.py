@@ -59,16 +59,27 @@ st.markdown(
 html { scroll-behavior: smooth; }
 .stApp {
     background:
+        linear-gradient(rgba(114,145,162,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(114,145,162,.035) 1px, transparent 1px),
         radial-gradient(circle at 4% 0%, rgba(196,154,85,.13), transparent 24%),
         radial-gradient(circle at 100% 9%, rgba(43,101,137,.11), transparent 27%),
         linear-gradient(180deg, #f8fafb 0%, var(--canvas) 100%);
+    background-size:42px 42px, 42px 42px, auto, auto, auto;
     color: var(--ink);
 }
-div[data-testid="stBottom"] {
-    background:transparent !important; border:0 !important; box-shadow:none !important;
-    pointer-events:none !important;
+/* Streamlit renders the chat composer inside a separate bottom block. Clear
+   every layer of that block so it can never become a black footer mask. */
+div[data-testid="stBottom"],
+div[data-testid="stBottomBlockContainer"],
+div[data-testid="stBottom"] > div,
+div[data-testid="stBottomBlockContainer"] > div,
+div[class*="stBottom"] {
+    background:transparent !important; background-color:transparent !important;
+    border:0 !important; box-shadow:none !important;
 }
-div[data-testid="stBottom"] [data-testid="stChatInput"] { pointer-events:auto !important; }
+div[data-testid="stBottom"], div[data-testid="stBottomBlockContainer"] { pointer-events:none !important; }
+div[data-testid="stBottom"] [data-testid="stChatInput"],
+div[data-testid="stBottomBlockContainer"] [data-testid="stChatInput"] { pointer-events:auto !important; }
 .block-container {
     max-width: 1280px;
     padding: 1.15rem 2.1rem 5.5rem;
@@ -99,7 +110,11 @@ header[data-testid="stHeader"] { background: transparent; }
 .hero {
     position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.8); border-radius:30px;
     padding:40px 44px 37px; margin:0 0 22px;
-    background:linear-gradient(132deg, rgba(13,31,50,.99), rgba(30,64,87,.97));
+    background:
+        linear-gradient(rgba(141,209,218,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(141,209,218,.045) 1px, transparent 1px),
+        linear-gradient(132deg, rgba(7,25,43,.99), rgba(20,61,83,.97));
+    background-size:44px 44px, 44px 44px, auto;
     box-shadow:0 26px 70px rgba(16,36,58,.18);
 }
 .hero .eyebrow:before { content:"// "; color:#79d8c5; }
@@ -127,8 +142,8 @@ header[data-testid="stHeader"] { background: transparent; }
     position:sticky !important; bottom:18px !important; z-index:30 !important;
     width:min(760px, calc(100% - 28px)) !important; margin:22px auto 8px !important;
     border:1px solid rgba(155,207,225,.46) !important; border-radius:22px !important;
-    background:linear-gradient(135deg, rgba(10,31,52,.98), rgba(22,70,91,.97) 55%, rgba(31,50,84,.98)) !important;
-    box-shadow:0 18px 42px rgba(10,35,57,.25), 0 0 0 5px rgba(255,255,255,.35), inset 0 1px 0 rgba(255,255,255,.16) !important;
+    background:linear-gradient(135deg, #071b30, #123e56 55%, #202d52) !important;
+    box-shadow:0 18px 42px rgba(10,35,57,.30), 0 0 0 4px rgba(105,218,207,.17), 0 0 28px rgba(70,196,193,.16), inset 0 1px 0 rgba(255,255,255,.20) !important;
     padding:5px !important;
 }
 [data-testid="stChatInput"] > div {
