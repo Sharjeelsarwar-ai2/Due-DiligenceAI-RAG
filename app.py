@@ -117,11 +117,25 @@ header[data-testid="stHeader"] { background: transparent; }
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) { background:#edf3f7; border-color:#dce7ee; }
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) { border-left:3px solid var(--gold); }
 [data-testid="stChatInput"] {
-    border:1px solid #cbd7df !important; border-radius:20px !important; background:rgba(255,255,255,.97) !important;
-    box-shadow:0 14px 32px rgba(16,36,58,.10) !important; padding:5px !important;
+    position:sticky !important; bottom:18px !important; z-index:30 !important;
+    width:min(760px, calc(100% - 28px)) !important; margin:22px auto 8px !important;
+    border:1px solid rgba(155,207,225,.46) !important; border-radius:22px !important;
+    background:linear-gradient(135deg, rgba(10,31,52,.98), rgba(22,70,91,.97) 55%, rgba(31,50,84,.98)) !important;
+    box-shadow:0 18px 42px rgba(10,35,57,.25), 0 0 0 5px rgba(255,255,255,.35), inset 0 1px 0 rgba(255,255,255,.16) !important;
+    padding:5px !important;
 }
-[data-testid="stChatInput"] textarea { color:var(--ink) !important; font-size:.93rem !important; }
-[data-testid="stChatInput"] button { color:var(--navy) !important; }
+[data-testid="stChatInput"] > div {
+    border:1px solid rgba(189,226,237,.16) !important; border-radius:16px !important;
+    background:linear-gradient(105deg, rgba(255,255,255,.10), rgba(255,255,255,.045)) !important;
+}
+[data-testid="stChatInput"] textarea { color:#edf8fb !important; caret-color:#91e7da !important; font-size:.90rem !important; }
+[data-testid="stChatInput"] textarea::placeholder { color:rgba(224,240,246,.68) !important; }
+[data-testid="stChatInput"] button {
+    color:#0d3048 !important; background:linear-gradient(145deg, #b7f1df, #78d8d0) !important;
+    border:1px solid rgba(255,255,255,.5) !important; border-radius:12px !important;
+    box-shadow:0 5px 16px rgba(93,222,199,.23) !important;
+}
+[data-testid="stChatInput"] button:hover { transform:translateY(-1px); filter:brightness(1.06); }
 
 .quick-grid { display:flex; gap:9px; flex-wrap:wrap; margin:0 0 15px; }
 .quick-caption { color:var(--muted); font-size:.77rem; margin:1px 0 9px; }
@@ -133,6 +147,17 @@ button[kind="secondary"]:hover { border-color:var(--gold) !important; color:var(
 .source-meta { color:var(--muted); font-size:.78rem; margin-top:5px; }
 .info-card { border-left:4px solid var(--gold); border-radius:14px; padding:14px 16px; background:#fffaf1; margin:8px 0; }
 .stExpander { border-color:rgba(139,158,178,.22) !important; border-radius:15px !important; background:rgba(255,255,255,.43) !important; }
+div[data-testid="stPopover"] > button {
+    border:1px solid rgba(196,154,85,.42) !important; border-radius:999px !important;
+    background:linear-gradient(135deg, rgba(255,250,237,.96), rgba(241,247,249,.96)) !important;
+    color:#76582a !important; font-size:.73rem !important; font-weight:800 !important;
+    padding:6px 12px !important; min-height:0 !important; margin-top:10px !important;
+    box-shadow:0 5px 16px rgba(16,36,58,.07) !important;
+}
+div[data-testid="stPopover"] > button:hover { border-color:var(--gold) !important; transform:translateY(-1px); }
+[data-testid="stPopoverBody"] { border-radius:18px !important; }
+.citation-intro { color:var(--muted); font-size:.75rem; line-height:1.5; margin-bottom:10px; }
+.citation-index { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:7px; background:#e8f4f1; color:#137c68; font-size:.72rem; font-weight:850; margin-right:7px; }
 
 .float-rail {
     position:fixed; z-index:20; right:22px; top:44%; transform:translateY(-50%); display:flex; flex-direction:column; gap:8px;
@@ -149,6 +174,7 @@ button[kind="secondary"]:hover { border-color:var(--gold) !important; color:var(
     .topbar { padding-bottom:16px; }
     .float-rail { right:10px; top:auto; bottom:17px; transform:none; flex-direction:row; border-radius:16px; }
     .chat-shell { padding:12px 10px 5px; border-radius:21px; }
+    [data-testid="stChatInput"] { width:calc(100% - 12px) !important; bottom:10px !important; margin-top:16px !important; }
 }
 </style>
 """,
@@ -250,6 +276,27 @@ def render_sources(results):
         )
 
 
+def render_citation_popover(results):
+    """Render a compact, in-context source citation popover for an answer."""
+    with st.popover(f"⌁  Sources cited · {len(results)}"):
+        st.markdown(
+            '<div class="citation-intro">The answer above was generated from these retrieved records. Open each source card to verify the underlying evidence.</div>',
+            unsafe_allow_html=True,
+        )
+        for number, x in enumerate(results, 1):
+            excerpt = " ".join(x["text"].split())
+            if len(excerpt) > 240:
+                excerpt = excerpt[:240] + "..."
+            st.markdown(
+                f"""<div class="source-card">
+<div class="source-name"><span class="citation-index">{number}</span>{x['source_file']}</div>
+<div class="source-meta">{x['category']} · Page {x['page']} · Relevance {x['score']:.3f}</div>
+<div style="margin-top:7px;color:#475569;font-size:.81rem;line-height:1.5">{excerpt}</div>
+</div>""",
+                unsafe_allow_html=True,
+            )
+
+
 # ============================================================
 # LOAD
 # ============================================================
@@ -309,8 +356,7 @@ for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
         if m["role"] == "assistant" and m.get("sources"):
-            with st.expander("Evidence & source documents"):
-                render_sources(m["sources"])
+            render_citation_popover(m["sources"])
 
 question = st.chat_input("Ask a property due-diligence question...")
 
@@ -331,8 +377,7 @@ if question:
                 answer = ask_llm(question, results, groq_client)
         st.markdown(answer)
         if results:
-            with st.expander(f"Evidence & source documents · {len(results)} retrieved"):
-                render_sources(results)
+            render_citation_popover(results)
     st.session_state.messages.append({"role": "assistant", "content": answer, "sources": results})
 
 st.markdown('</div>', unsafe_allow_html=True)
