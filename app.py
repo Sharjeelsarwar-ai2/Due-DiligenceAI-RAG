@@ -64,6 +64,11 @@ html { scroll-behavior: smooth; }
         linear-gradient(180deg, #f8fafb 0%, var(--canvas) 100%);
     color: var(--ink);
 }
+div[data-testid="stBottom"] {
+    background:transparent !important; border:0 !important; box-shadow:none !important;
+    pointer-events:none !important;
+}
+div[data-testid="stBottom"] [data-testid="stChatInput"] { pointer-events:auto !important; }
 .block-container {
     max-width: 1280px;
     padding: 1.15rem 2.1rem 5.5rem;
@@ -73,8 +78,9 @@ header[data-testid="stHeader"] { background: transparent; }
 
 .topbar {
     display:flex; justify-content:space-between; align-items:center;
-    padding: 4px 2px 22px;
+    padding: 4px 2px 22px; position:relative;
 }
+.topbar:after { content:""; position:absolute; left:0; right:0; bottom:10px; height:1px; background:linear-gradient(90deg, transparent, rgba(114,145,162,.24), transparent); }
 .brand { display:flex; align-items:center; gap:12px; }
 .brand-mark {
     width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center;
@@ -96,6 +102,7 @@ header[data-testid="stHeader"] { background: transparent; }
     background:linear-gradient(132deg, rgba(13,31,50,.99), rgba(30,64,87,.97));
     box-shadow:0 26px 70px rgba(16,36,58,.18);
 }
+.hero .eyebrow:before { content:"// "; color:#79d8c5; }
 .hero:before { content:""; position:absolute; width:330px; height:330px; right:-110px; top:-135px; border-radius:50%; border:1px solid rgba(238,217,169,.20); box-shadow:0 0 0 38px rgba(238,217,169,.035), 0 0 0 76px rgba(238,217,169,.025); }
 .hero:after { content:""; position:absolute; width:180px; height:180px; left:-90px; bottom:-115px; border-radius:50%; background:rgba(41,119,143,.19); }
 .eyebrow { position:relative; z-index:1; color:var(--gold-light); font-size:.69rem; letter-spacing:.18em; font-weight:850; text-transform:uppercase; }
@@ -159,6 +166,9 @@ div[data-testid="stPopover"] > button:hover { border-color:var(--gold) !importan
 .citation-intro { color:var(--muted); font-size:.75rem; line-height:1.5; margin-bottom:10px; }
 .citation-index { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:7px; background:#e8f4f1; color:#137c68; font-size:.72rem; font-weight:850; margin-right:7px; }
 
+/* Keep the host application's bottom chrome from becoming a black footer. */
+footer { display:none !important; }
+
 .float-rail {
     position:fixed; z-index:20; right:22px; top:44%; transform:translateY(-50%); display:flex; flex-direction:column; gap:8px;
     padding:8px; border:1px solid rgba(255,255,255,.78); border-radius:18px; background:rgba(255,255,255,.72);
@@ -166,7 +176,6 @@ div[data-testid="stPopover"] > button:hover { border-color:var(--gold) !importan
 }
 .float-rail a { width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:11px; color:#648098; text-decoration:none; font-size:15px; transition:.2s ease; }
 .float-rail a:hover { color:white; background:var(--navy); transform:translateY(-1px); }
-.footer-note { color:#8190a0; text-align:center; font-size:.72rem; margin-top:34px; }
 @media (max-width: 760px) {
     .block-container { padding: .8rem 1rem 4.5rem; }
     .hero { padding:28px 24px; border-radius:23px; }
@@ -381,4 +390,3 @@ if question:
     st.session_state.messages.append({"role": "assistant", "content": answer, "sources": results})
 
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('<div class="footer-note">Analysis is grounded in the connected property repository. Verify material findings against current originals before a transaction decision.</div>', unsafe_allow_html=True)
