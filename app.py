@@ -140,7 +140,8 @@ header[data-testid="stHeader"] { background: transparent; }
 [data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-assistant"]) { border-left:3px solid var(--gold); }
 [data-testid="stChatInput"] {
     position:sticky !important; bottom:18px !important; z-index:30 !important;
-    width:min(760px, calc(100% - 28px)) !important; margin:22px auto 8px !important;
+    width:min(780px, calc(100% - 40px)) !important; bottom:24px !important;
+    margin:24px auto 12px !important;
     border:1px solid rgba(155,207,225,.46) !important; border-radius:22px !important;
     background:linear-gradient(135deg, #071b30, #123e56 55%, #202d52) !important;
     box-shadow:0 18px 42px rgba(10,35,57,.30), 0 0 0 4px rgba(105,218,207,.17), 0 0 28px rgba(70,196,193,.16), inset 0 1px 0 rgba(255,255,255,.20) !important;
@@ -158,6 +159,22 @@ header[data-testid="stHeader"] { background: transparent; }
     box-shadow:0 5px 16px rgba(93,222,199,.23) !important;
 }
 [data-testid="stChatInput"] button:hover { transform:translateY(-1px); filter:brightness(1.06); }
+.typing-indicator {
+    position:fixed; z-index:29; left:50%; bottom:112px; transform:translateX(-50%);
+    display:flex; align-items:center; gap:9px; padding:8px 14px 8px 11px;
+    border:1px solid rgba(151,226,218,.28); border-radius:999px;
+    color:#d8f7f2; background:linear-gradient(115deg, rgba(7,27,48,.94), rgba(20,75,91,.91));
+    box-shadow:0 10px 30px rgba(9,37,58,.20), 0 0 22px rgba(76,205,193,.13);
+    backdrop-filter:blur(16px); font-size:.72rem; font-weight:750; letter-spacing:.02em;
+    animation:typing-rise .28s ease-out;
+}
+.typing-orb { width:7px; height:7px; border-radius:50%; background:#8ee9d7; box-shadow:0 0 0 4px rgba(142,233,215,.12), 0 0 12px #8ee9d7; }
+.typing-dots { display:inline-flex; gap:3px; margin-left:1px; }
+.typing-dots i { display:block; width:4px; height:4px; border-radius:50%; background:#a9eee1; animation:typing-bounce 1.15s infinite ease-in-out; }
+.typing-dots i:nth-child(2) { animation-delay:.15s; }
+.typing-dots i:nth-child(3) { animation-delay:.30s; }
+@keyframes typing-bounce { 0%,60%,100% { opacity:.32; transform:translateY(0); } 30% { opacity:1; transform:translateY(-3px); } }
+@keyframes typing-rise { from { opacity:0; transform:translate(-50%, 8px); } to { opacity:1; transform:translate(-50%, 0); } }
 
 .quick-grid { display:flex; gap:9px; flex-wrap:wrap; margin:0 0 15px; }
 .quick-caption { color:var(--muted); font-size:.77rem; margin:1px 0 9px; }
@@ -199,6 +216,7 @@ footer { display:none !important; }
     .float-rail { right:10px; top:auto; bottom:17px; transform:none; flex-direction:row; border-radius:16px; }
     .chat-shell { padding:12px 10px 5px; border-radius:21px; }
     [data-testid="stChatInput"] { width:calc(100% - 12px) !important; bottom:10px !important; margin-top:16px !important; }
+    .typing-indicator { bottom:84px; }
 }
 </style>
 """,
@@ -392,6 +410,11 @@ if question:
     with st.chat_message("user"):
         st.markdown(question)
     with st.chat_message("assistant"):
+        typing_status = st.empty()
+        typing_status.markdown(
+            """<div class="typing-indicator"><span class="typing-orb"></span><span>Analyzing your repository</span><span class="typing-dots"><i></i><i></i><i></i></span></div>""",
+            unsafe_allow_html=True,
+        )
         with st.spinner("Searching the property repository..."):
             results = retrieve(question, index, metadata, embedding_model)
         if not results:
@@ -399,6 +422,7 @@ if question:
         else:
             with st.spinner("Preparing source-backed analysis..."):
                 answer = ask_llm(question, results, groq_client)
+        typing_status.empty()
         st.markdown(answer)
         if results:
             render_citation_popover(results)
