@@ -27,7 +27,7 @@ MIN_RELEVANCE = 0.22
 # ============================================================
 
 st.set_page_config(
-    page_title="Property Intelligence",
+    page_title="Due Diligence AI",
     page_icon="◆",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -356,7 +356,7 @@ except Exception as e:
 
 st.markdown(
     """<div class="topbar" id="top">
-<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">Property Intelligence</div><div class="brand-sub">Enterprise Due Diligence</div></div></div>
+<div class="brand"><div class="brand-mark">◆</div><div><div class="brand-title">Due Diligence</div><div class="brand-sub">Real Estate documents assistant</div></div></div>
 <div class="status-chip"><span class="status-dot"></span> Knowledge base connected</div>
 </div>
 <div class="float-rail" aria-label="Quick navigation">
